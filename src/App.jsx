@@ -5,6 +5,10 @@ const ClappyApp = () => {
   const [isOnline, setIsOnline] = useState(true);
   const [searchFocused, setSearchFocused] = useState(false);
   const [showNotification, setShowNotification] = useState(true);
+  const [showTemplateModal, setShowTemplateModal] = useState(false);
+  const [selectedLecture, setSelectedLecture] = useState(null);
+  const [isEditingSlide, setIsEditingSlide] = useState(false);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
 
   // Simulated real-time leaderboard data
   const [leaderboard, setLeaderboard] = useState([
@@ -17,10 +21,61 @@ const ClappyApp = () => {
 
   const menuItems = [
     { id: 'dashboard', icon: '📊', label: 'Tổng quan' },
-    { id: 'documents', icon: '📚', label: 'Kho tài liệu' },
-    { id: 'scores', icon: '🏆', label: 'Bảng điểm' },
-    { id: 'templates', icon: '✨', label: 'Kho mẫu' },
+    { id: 'lectures', icon: '📚', label: 'Kho bài giảng' },
+    { id: 'students', icon: '👥', label: 'Quản lí học sinh' },
     { id: 'settings', icon: '⚙️', label: 'Cài đặt' },
+  ];
+
+  // Dữ liệu bài giảng
+  const lectures = [
+    {
+      id: 1,
+      name: 'Chiến lược Marketing số',
+      thumbnail: '📊',
+      slides: 24,
+      lastEdited: '2 giờ trước',
+      category: 'Marketing'
+    },
+    {
+      id: 2,
+      name: 'Quản trị nguồn nhân lực',
+      thumbnail: '👥',
+      slides: 18,
+      lastEdited: '1 ngày trước',
+      category: 'Nhân sự'
+    },
+    {
+      id: 3,
+      name: 'Phân tích tài chính doanh nghiệp',
+      thumbnail: '💰',
+      slides: 32,
+      lastEdited: '3 ngày trước',
+      category: 'Tài chính'
+    },
+    {
+      id: 4,
+      name: 'Kỹ năng lãnh đạo hiện đại',
+      thumbnail: '🎯',
+      slides: 20,
+      lastEdited: '5 ngày trước',
+      category: 'Lãnh đạo'
+    },
+    {
+      id: 5,
+      name: 'Đổi mới sáng tạo trong kinh doanh',
+      thumbnail: '💡',
+      slides: 28,
+      lastEdited: '1 tuần trước',
+      category: 'Đổi mới'
+    },
+    {
+      id: 6,
+      name: 'Quản lý dự án Agile',
+      thumbnail: '⚡',
+      slides: 22,
+      lastEdited: '2 tuần trước',
+      category: 'Quản lý'
+    },
   ];
 
   const documents = [
@@ -28,6 +83,52 @@ const ClappyApp = () => {
     { id: 2, name: 'Lý 11 - Điện học', type: 'folder', locked: true, items: 8 },
     { id: 3, name: 'Hóa 12 - Hữu cơ', type: 'folder', locked: false, items: 15 },
     { id: 4, name: 'Văn 10 - Văn học dân gian', type: 'folder', locked: true, items: 6 },
+  ];
+
+  // Template doanh nghiệp
+  const businessTemplates = [
+    {
+      id: 1,
+      name: 'Thuyết trình doanh nghiệp',
+      preview: '💼',
+      category: 'Doanh nghiệp',
+      description: 'Mẫu chuyên nghiệp cho các buổi thuyết trình công ty'
+    },
+    {
+      id: 2,
+      name: 'Báo cáo tài chính',
+      preview: '📊',
+      category: 'Tài chính',
+      description: 'Trình bày số liệu và biểu đồ tài chính'
+    },
+    {
+      id: 3,
+      name: 'Pitch Deck Startup',
+      preview: '🚀',
+      category: 'Startup',
+      description: 'Kêu gọi đầu tư cho dự án khởi nghiệp'
+    },
+    {
+      id: 4,
+      name: 'Đào tạo nhân viên',
+      preview: '👥',
+      category: 'Đào tạo',
+      description: 'Tài liệu đào tạo nội bộ công ty'
+    },
+    {
+      id: 5,
+      name: 'Marketing Strategy',
+      preview: '📱',
+      category: 'Marketing',
+      description: 'Chiến lược marketing và phân tích thị trường'
+    },
+    {
+      id: 6,
+      name: 'Quản lý dự án',
+      preview: '⚡',
+      category: 'Quản lý',
+      description: 'Timeline và kế hoạch dự án'
+    },
   ];
 
   const templates = [
@@ -178,6 +279,187 @@ const ClappyApp = () => {
     </div>
   );
 
+  // Component: Kho bài giảng
+  const renderLectures = () => (
+    <div className="space-y-6">
+      {/* Header với nút tạo mới */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-bold text-gray-800">Bài giảng của bạn</h3>
+          <p className="text-sm text-gray-500">Quản lý và chỉnh sửa các bài giảng đã chuẩn bị</p>
+        </div>
+        <button
+          onClick={() => setShowTemplateModal(true)}
+          className="flex items-center gap-2 rounded-xl bg-blue-500 px-6 py-3 font-semibold text-white shadow-lg transition-all duration-300 hover:bg-blue-600 hover:shadow-xl hover:scale-105"
+        >
+          <span className="text-xl">➕</span>
+          <span>Tạo slide mới</span>
+        </button>
+      </div>
+
+      {/* Grid bài giảng */}
+      <div className="grid grid-cols-3 gap-6">
+        {lectures.map((lecture) => (
+          <div
+            key={lecture.id}
+            className="group relative cursor-pointer overflow-hidden rounded-2xl bg-white shadow-lg transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl"
+          >
+            {/* Thumbnail */}
+            <div className="relative flex h-48 items-center justify-center bg-gradient-to-br from-blue-400 via-blue-500 to-blue-600">
+              <span className="text-7xl transition-transform duration-300 group-hover:scale-125">
+                {lecture.thumbnail}
+              </span>
+              <div className="absolute inset-0 flex items-center justify-center bg-black/0 opacity-0 transition-all duration-300 group-hover:bg-black/20 group-hover:opacity-100">
+                <div className="flex gap-3">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedLecture(lecture);
+                      setIsEditingSlide(true);
+                    }}
+                    className="rounded-xl bg-white px-4 py-2 font-medium text-blue-600 shadow-lg transition-transform duration-300 hover:scale-105"
+                  >
+                    ✏️ Chỉnh sửa
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedLecture(lecture);
+                      setIsEditingSlide(true);
+                    }}
+                    className="rounded-xl bg-green-500 px-4 py-2 font-medium text-white shadow-lg transition-transform duration-300 hover:scale-105"
+                  >
+                    ▶️ Trình chiếu
+                  </button>
+                </div>
+              </div>
+              {/* Badge category */}
+              <div className="absolute right-3 top-3 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-blue-600">
+                {lecture.category}
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="p-5">
+              <h4 className="font-bold text-gray-800 text-lg">{lecture.name}</h4>
+              <div className="mt-3 flex items-center justify-between text-sm text-gray-500">
+                <span className="flex items-center gap-1">
+                  📄 {lecture.slides} slides
+                </span>
+                <span>🕒 {lecture.lastEdited}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  // Component: Modal Template
+  const renderTemplateModal = () => {
+    if (!showTemplateModal) return null;
+
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+        <div className="relative max-h-[90vh] w-[900px] overflow-auto rounded-3xl bg-white p-8 shadow-2xl">
+          {/* Header Modal */}
+          <div className="mb-6 flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-800">Chọn Template</h2>
+              <p className="text-sm text-gray-500">Bắt đầu với mẫu thiết kế chuyên nghiệp</p>
+            </div>
+            <button
+              onClick={() => setShowTemplateModal(false)}
+              className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200"
+            >
+              ✕
+            </button>
+          </div>
+
+          {/* Nút tự tạo thiết kế */}
+          <div className="mb-6">
+            <button
+              onClick={() => {
+                // Tạo bài giảng mới rỗng
+                const newLecture = {
+                  id: Date.now(),
+                  name: 'Bài giảng mới',
+                  thumbnail: '✨',
+                  slides: 1,
+                  lastEdited: 'Vừa xong',
+                  category: 'Tùy chỉnh'
+                };
+                setSelectedLecture(newLecture);
+                setShowTemplateModal(false);
+                setIsEditingSlide(true);
+                setCurrentSlideIndex(0);
+              }}
+              className="group w-full overflow-hidden rounded-2xl border-2 border-dashed border-blue-300 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-center transition-all duration-300 hover:border-blue-500 hover:shadow-lg"
+            >
+              <div className="flex items-center justify-center gap-4">
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500 text-3xl text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
+                  ✨
+                </div>
+                <div className="text-left">
+                  <h3 className="text-xl font-bold text-gray-800">Tự tạo thiết kế mới</h3>
+                  <p className="text-sm text-gray-600">Bắt đầu từ slide trắng và tự do sáng tạo</p>
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Grid Templates */}
+          <div>
+            <h3 className="mb-4 text-lg font-bold text-gray-700">Mẫu doanh nghiệp</h3>
+            <div className="grid grid-cols-3 gap-4">
+              {businessTemplates.map((template) => (
+                <div
+                  key={template.id}
+                  className="group cursor-pointer overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+                >
+                  {/* Preview */}
+                  <div className="relative flex h-32 items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                    <span className="text-5xl transition-transform duration-300 group-hover:scale-125">
+                      {template.preview}
+                    </span>
+                  </div>
+                  {/* Info */}
+                  <div className="p-4">
+                    <div className="mb-2 inline-block rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-600">
+                      {template.category}
+                    </div>
+                    <h4 className="font-bold text-gray-800">{template.name}</h4>
+                    <p className="mt-1 text-xs text-gray-500">{template.description}</p>
+                    <button
+                      onClick={() => {
+                        // Tạo bài giảng mới từ template
+                        const newLecture = {
+                          id: Date.now(),
+                          name: template.name,
+                          thumbnail: template.preview,
+                          slides: 5, // Mặc định 5 slides cho template
+                          lastEdited: 'Vừa xong',
+                          category: template.category
+                        };
+                        setSelectedLecture(newLecture);
+                        setShowTemplateModal(false);
+                        setIsEditingSlide(true);
+                        setCurrentSlideIndex(0);
+                      }}
+                      className="mt-3 w-full rounded-lg bg-blue-500 py-2 text-sm font-medium text-white transition-all hover:bg-blue-600"
+                    >
+                      Sử dụng mẫu
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderDocuments = () => (
     <div className="space-y-6">
       {/* Upload Zone */}
@@ -229,6 +511,72 @@ const ClappyApp = () => {
                   Chia sẻ
                 </button>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  // Component: Quản lí học sinh
+  const renderStudents = () => (
+    <div className="space-y-6">
+      {/* Header thống kê */}
+      <div className="grid grid-cols-4 gap-4">
+        <div className="rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white shadow-lg">
+          <div className="text-3xl font-bold">156</div>
+          <div className="text-sm text-blue-100">Tổng học sinh</div>
+        </div>
+        <div className="rounded-2xl bg-gradient-to-br from-green-500 to-green-600 p-6 text-white shadow-lg">
+          <div className="text-3xl font-bold">42</div>
+          <div className="text-sm text-green-100">Đang online</div>
+        </div>
+        <div className="rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white shadow-lg">
+          <div className="text-3xl font-bold">8.2</div>
+          <div className="text-sm text-purple-100">Điểm trung bình</div>
+        </div>
+        <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 p-6 text-white shadow-lg">
+          <div className="text-3xl font-bold">12</div>
+          <div className="text-sm text-orange-100">Lớp học</div>
+        </div>
+      </div>
+
+      {/* Danh sách học sinh */}
+      <div className="rounded-2xl bg-white p-6 shadow-lg">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-bold text-gray-800">Danh sách học sinh</h3>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Tìm kiếm học sinh..."
+              className="rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
+            />
+            <button className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600">
+              ➕ Thêm học sinh
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {leaderboard.map((student, idx) => (
+            <div
+              key={student.id}
+              className="flex items-center gap-4 rounded-xl bg-gray-50 p-4 transition-all hover:bg-blue-50"
+            >
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-xl text-white">
+                {student.avatar}
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-gray-800">{student.name}</div>
+                <div className="text-sm text-gray-500">Lớp 10A{idx + 1}</div>
+              </div>
+              <div className="text-right">
+                <div className="font-bold text-gray-800">{student.score} điểm</div>
+                <div className="text-sm text-gray-500">Điểm tổng</div>
+              </div>
+              <button className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200">
+                Chi tiết
+              </button>
             </div>
           ))}
         </div>
@@ -486,12 +834,197 @@ const ClappyApp = () => {
     </div>
   );
 
+  // Component: Trang chỉnh sửa slide
+  const renderSlideEditor = () => {
+    if (!selectedLecture) return null;
+
+    // Mock slides data
+    const slidesList = Array.from({ length: selectedLecture.slides }, (_, i) => ({
+      id: i + 1,
+      title: `Slide ${i + 1}`,
+      thumbnail: '📄',
+    }));
+
+    return (
+      <div className="flex h-full gap-4">
+        {/* Sidebar - Danh sách slides */}
+        <div className="w-64 flex-shrink-0 overflow-auto rounded-2xl bg-white p-4 shadow-lg">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="font-bold text-gray-800">Slides</h3>
+            <button className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500 text-white transition-all hover:bg-blue-600">
+              ➕
+            </button>
+          </div>
+          <div className="space-y-2">
+            {slidesList.map((slide, index) => (
+              <div
+                key={slide.id}
+                onClick={() => setCurrentSlideIndex(index)}
+                className={`group cursor-pointer rounded-xl border-2 p-3 transition-all ${
+                  currentSlideIndex === index
+                    ? 'border-blue-500 bg-blue-50'
+                    : 'border-gray-200 bg-white hover:border-blue-300 hover:bg-blue-50/50'
+                }`}
+              >
+                <div className="mb-2 flex h-24 items-center justify-center rounded-lg bg-gradient-to-br from-gray-100 to-gray-200">
+                  <span className="text-3xl">{slide.thumbnail}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium text-gray-700">{slide.title}</span>
+                  <button className="opacity-0 transition-opacity group-hover:opacity-100">
+                    <span className="text-gray-400 hover:text-red-500">🗑️</span>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Main editor area */}
+        <div className="flex flex-1 flex-col gap-4">
+          {/* Toolbar */}
+          <div className="flex items-center justify-between rounded-2xl bg-white p-4 shadow-lg">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setIsEditingSlide(false);
+                  setSelectedLecture(null);
+                }}
+                className="flex items-center gap-2 rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-200"
+              >
+                ← Quay lại
+              </button>
+              <div className="mx-4 h-8 w-px bg-gray-200" />
+              <button className="rounded-lg bg-gray-100 p-2 transition-all hover:bg-gray-200" title="Text">
+                <span className="text-lg">📝</span>
+              </button>
+              <button className="rounded-lg bg-gray-100 p-2 transition-all hover:bg-gray-200" title="Image">
+                <span className="text-lg">🖼️</span>
+              </button>
+              <button className="rounded-lg bg-gray-100 p-2 transition-all hover:bg-gray-200" title="Video">
+                <span className="text-lg">🎥</span>
+              </button>
+              <button className="rounded-lg bg-gray-100 p-2 transition-all hover:bg-gray-200" title="Quiz">
+                <span className="text-lg">❓</span>
+              </button>
+              <button className="rounded-lg bg-gray-100 p-2 transition-all hover:bg-gray-200" title="Poll">
+                <span className="text-lg">📊</span>
+              </button>
+              <button className="rounded-lg bg-gray-100 p-2 transition-all hover:bg-gray-200" title="Q&A">
+                <span className="text-lg">💬</span>
+              </button>
+            </div>
+            <div className="flex items-center gap-3">
+              <button className="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-200">
+                💾 Lưu
+              </button>
+              <button className="rounded-lg bg-green-500 px-6 py-2 font-medium text-white transition-all hover:bg-green-600">
+                ▶️ Trình chiếu
+              </button>
+            </div>
+          </div>
+
+          {/* Canvas area */}
+          <div className="flex flex-1 items-center justify-center rounded-2xl bg-white p-8 shadow-lg">
+            <div className="flex aspect-[16/9] w-full max-w-5xl items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-gradient-to-br from-blue-50 to-indigo-50">
+              <div className="text-center">
+                <span className="text-7xl">{selectedLecture.thumbnail}</span>
+                <h2 className="mt-4 text-3xl font-bold text-gray-800">{selectedLecture.name}</h2>
+                <p className="mt-2 text-gray-500">Slide {currentSlideIndex + 1} / {selectedLecture.slides}</p>
+                <div className="mt-6 flex justify-center gap-3">
+                  <button className="rounded-xl bg-blue-500 px-6 py-3 font-medium text-white transition-all hover:bg-blue-600">
+                    ✏️ Chỉnh sửa nội dung
+                  </button>
+                  <button className="rounded-xl bg-gray-200 px-6 py-3 font-medium text-gray-700 transition-all hover:bg-gray-300">
+                    🎨 Thay đổi thiết kế
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Navigation controls */}
+          <div className="flex items-center justify-center gap-4 rounded-2xl bg-white p-4 shadow-lg">
+            <button
+              onClick={() => setCurrentSlideIndex(Math.max(0, currentSlideIndex - 1))}
+              disabled={currentSlideIndex === 0}
+              className="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-200 disabled:opacity-50"
+            >
+              ← Trước
+            </button>
+            <span className="text-sm font-medium text-gray-600">
+              {currentSlideIndex + 1} / {selectedLecture.slides}
+            </span>
+            <button
+              onClick={() => setCurrentSlideIndex(Math.min(selectedLecture.slides - 1, currentSlideIndex + 1))}
+              disabled={currentSlideIndex === selectedLecture.slides - 1}
+              className="rounded-lg bg-gray-100 px-4 py-2 font-medium text-gray-700 transition-all hover:bg-gray-200 disabled:opacity-50"
+            >
+              Sau →
+            </button>
+          </div>
+        </div>
+
+        {/* Right sidebar - Properties panel */}
+        <div className="w-72 flex-shrink-0 overflow-auto rounded-2xl bg-white p-4 shadow-lg">
+          <h3 className="mb-4 font-bold text-gray-800">Thuộc tính</h3>
+
+          {/* Slide settings */}
+          <div className="mb-6">
+            <h4 className="mb-2 text-sm font-medium text-gray-600">Cài đặt slide</h4>
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs text-gray-500">Tiêu đề</label>
+                <input
+                  type="text"
+                  defaultValue={`Slide ${currentSlideIndex + 1}`}
+                  className="mt-1 w-full rounded-lg border border-gray-200 px-3 py-2 text-sm focus:border-blue-400 focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500">Background</label>
+                <div className="mt-1 grid grid-cols-5 gap-2">
+                  {['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-gray-200'].map((color) => (
+                    <button
+                      key={color}
+                      className={`h-8 w-8 rounded-lg ${color} border-2 border-gray-300 transition-all hover:scale-110`}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive elements */}
+          <div>
+            <h4 className="mb-2 text-sm font-medium text-gray-600">Thêm tương tác</h4>
+            <div className="space-y-2">
+              <button className="w-full rounded-lg bg-blue-50 px-3 py-2 text-left text-sm font-medium text-blue-700 transition-all hover:bg-blue-100">
+                ❓ Câu hỏi Quiz
+              </button>
+              <button className="w-full rounded-lg bg-green-50 px-3 py-2 text-left text-sm font-medium text-green-700 transition-all hover:bg-green-100">
+                📊 Bình chọn (Poll)
+              </button>
+              <button className="w-full rounded-lg bg-purple-50 px-3 py-2 text-left text-sm font-medium text-purple-700 transition-all hover:bg-purple-100">
+                💬 Hỏi & Đáp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   const renderContent = () => {
+    // Nếu đang ở chế độ chỉnh sửa slide, hiển thị slide editor
+    if (isEditingSlide && selectedLecture) {
+      return renderSlideEditor();
+    }
+
     switch (activeTab) {
       case 'dashboard': return renderDashboard();
-      case 'documents': return renderDocuments();
-      case 'scores': return renderScores();
-      case 'templates': return renderTemplates();
+      case 'lectures': return renderLectures();
+      case 'students': return renderStudents();
       case 'settings': return renderSettings();
       default: return renderDashboard();
     }
@@ -630,23 +1163,38 @@ const ClappyApp = () => {
         {/* Content Area */}
         <div className="flex-1 overflow-auto p-8">
           {/* Page Title */}
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold text-gray-800">
-              {menuItems.find(item => item.id === activeTab)?.label}
-            </h2>
-            <p className="text-gray-500">
-              {activeTab === 'dashboard' && 'Tổng quan hoạt động giảng dạy của bạn'}
-              {activeTab === 'documents' && 'Quản lý và bảo mật tài liệu giảng dạy'}
-              {activeTab === 'scores' && 'Theo dõi điểm số và bảng xếp hạng học sinh'}
-              {activeTab === 'templates' && 'Khám phá các mẫu slide và quiz có sẵn'}
-              {activeTab === 'settings' && 'Cấu hình ứng dụng và thiết bị'}
-            </p>
-          </div>
+          {!isEditingSlide && (
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">
+                {menuItems.find(item => item.id === activeTab)?.label}
+              </h2>
+              <p className="text-gray-500">
+                {activeTab === 'dashboard' && 'Tổng quan hoạt động giảng dạy của bạn'}
+                {activeTab === 'lectures' && 'Quản lý và chỉnh sửa bài giảng của bạn'}
+                {activeTab === 'students' && 'Theo dõi và quản lý học sinh'}
+                {activeTab === 'settings' && 'Cấu hình ứng dụng và thiết bị'}
+              </p>
+            </div>
+          )}
+
+          {isEditingSlide && selectedLecture && (
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">
+                {selectedLecture.name}
+              </h2>
+              <p className="text-gray-500">
+                Chỉnh sửa và trình chiếu bài giảng
+              </p>
+            </div>
+          )}
 
           {/* Dynamic Content */}
           {renderContent()}
         </div>
       </main>
+
+      {/* Template Modal */}
+      {renderTemplateModal()}
     </div>
   );
 };
