@@ -9,14 +9,20 @@ const ClappyApp = () => {
   const [selectedLecture, setSelectedLecture] = useState(null);
   const [isEditingSlide, setIsEditingSlide] = useState(false);
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [showAddStudentModal, setShowAddStudentModal] = useState(false);
+  const [addStudentMode, setAddStudentMode] = useState(''); // 'excel' hoặc 'manual'
 
   // Simulated real-time leaderboard data
   const [leaderboard, setLeaderboard] = useState([
-    { id: 1, name: 'Nguyễn Minh Anh', score: 950, avatar: '🧑‍🎓', trend: 'up' },
-    { id: 2, name: 'Trần Văn Hùng', score: 920, avatar: '👨‍🎓', trend: 'up' },
-    { id: 3, name: 'Lê Thị Mai', score: 890, avatar: '👩‍🎓', trend: 'down' },
-    { id: 4, name: 'Phạm Đức Anh', score: 850, avatar: '🧑‍🎓', trend: 'same' },
-    { id: 5, name: 'Hoàng Thị Lan', score: 820, avatar: '👩‍🎓', trend: 'up' },
+    { id: 1, name: 'Nguyễn Minh Hiền', studentId: '22080125', score: 950, avatar: '👩‍🎓', trend: 'up' },
+    { id: 2, name: 'Ngô Hoàng Linh Đan', studentId: '22080111', score: 920, avatar: '👩‍🎓', trend: 'up' },
+    { id: 3, name: 'Trần Thị Thu Hà', studentId: '22080123', score: 890, avatar: '👩‍🎓', trend: 'down' },
+    { id: 4, name: 'Phạm Nguyễn Khánh Linh', studentId: '22080148', score: 850, avatar: '👩‍🎓', trend: 'same' },
+    { id: 5, name: 'Thái Hồng Nga', studentId: '22080158', score: 820, avatar: '👩‍🎓', trend: 'up' },
+    { id: 6, name: 'Trần Minh Quang', studentId: '22080171', score: 800, avatar: '👨‍🎓', trend: 'up' },
+    { id: 7, name: 'Nguyễn Phương Thảo', studentId: '22080181', score: 780, avatar: '👩‍🎓', trend: 'same' },
+    { id: 8, name: 'Mai Thủy Tiên', studentId: '22080186', score: 760, avatar: '👩‍🎓', trend: 'up' },
+    { id: 9, name: 'Nguyễn Hoàng Vũ', studentId: '22080190', score: 740, avatar: '👨‍🎓', trend: 'down' },
   ]);
 
   const menuItems = [
@@ -256,7 +262,7 @@ const ClappyApp = () => {
           <div className="mt-4 space-y-3">
             {[
               { icon: '📝', text: '15 học sinh đã nộp bài Toán chương 3', time: '5 phút trước', new: true },
-              { icon: '🎉', text: 'Nguyễn Minh Anh đạt điểm cao nhất lớp!', time: '1 giờ trước', new: true },
+              { icon: '🎉', text: 'Nguyễn Minh Hiền đạt điểm cao nhất lớp!', time: '1 giờ trước', new: true },
               { icon: '📊', text: 'Báo cáo tuần đã sẵn sàng', time: '2 giờ trước', new: false },
             ].map((item, idx) => (
               <div
@@ -354,6 +360,319 @@ const ClappyApp = () => {
       </div>
     </div>
   );
+
+  // Component: Modal Thêm học sinh
+  const renderAddStudentModal = () => {
+    if (!showAddStudentModal) return null;
+
+    // Nếu chưa chọn mode, hiển thị lựa chọn
+    if (!addStudentMode) {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="relative w-[600px] rounded-3xl bg-white p-8 shadow-2xl">
+            {/* Header */}
+            <div className="mb-6 flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-800">Thêm học sinh</h2>
+                <p className="text-sm text-gray-500">Chọn phương thức thêm học sinh</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAddStudentModal(false);
+                  setAddStudentMode('');
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Options */}
+            <div className="space-y-4">
+              {/* Option 1: Upload Excel */}
+              <button
+                onClick={() => setAddStudentMode('excel')}
+                className="group w-full overflow-hidden rounded-2xl border-2 border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50 p-6 text-left transition-all duration-300 hover:border-green-500 hover:shadow-lg"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-green-500 text-3xl text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
+                    📊
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-800">Tải file Excel</h3>
+                    <p className="text-sm text-gray-600">Thêm nhiều học sinh cùng lúc từ file Excel</p>
+                  </div>
+                  <span className="text-2xl text-gray-400 transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </div>
+              </button>
+
+              {/* Option 2: Manual Input */}
+              <button
+                onClick={() => setAddStudentMode('manual')}
+                className="group w-full overflow-hidden rounded-2xl border-2 border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-6 text-left transition-all duration-300 hover:border-blue-500 hover:shadow-lg"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-500 text-3xl text-white shadow-lg transition-transform duration-300 group-hover:scale-110">
+                    ✏️
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="text-xl font-bold text-gray-800">Tự nhập thông tin</h3>
+                    <p className="text-sm text-gray-600">Nhập thủ công thông tin chi tiết học sinh</p>
+                  </div>
+                  <span className="text-2xl text-gray-400 transition-transform duration-300 group-hover:translate-x-1">→</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Mode: Upload Excel
+    if (addStudentMode === 'excel') {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="relative w-[700px] rounded-3xl bg-white p-8 shadow-2xl">
+            {/* Header */}
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setAddStudentMode('')}
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200"
+                >
+                  ←
+                </button>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">Tải file Excel</h2>
+                  <p className="text-sm text-gray-500">Nhập danh sách học sinh từ file Excel</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAddStudentModal(false);
+                  setAddStudentMode('');
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Upload Zone */}
+            <div className="group relative overflow-hidden rounded-2xl border-2 border-dashed border-green-300 bg-green-50/50 p-12 text-center transition-all duration-300 hover:border-green-500 hover:bg-green-50">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500/5 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+              <div className="relative">
+                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl bg-green-100 text-4xl transition-transform duration-300 group-hover:scale-110">
+                  📊
+                </div>
+                <p className="mt-4 text-lg font-semibold text-gray-700">Kéo thả file Excel vào đây</p>
+                <p className="mt-2 text-sm text-gray-500">Hoặc click để chọn file</p>
+                <p className="mt-1 text-xs text-gray-400">Hỗ trợ: .xlsx, .xls (tối đa 5MB)</p>
+                <button className="mt-6 rounded-xl bg-green-500 px-8 py-3 font-medium text-white transition-all duration-300 hover:bg-green-600 hover:shadow-lg">
+                  Chọn file Excel
+                </button>
+              </div>
+            </div>
+
+            {/* Download Template */}
+            <div className="mt-6 rounded-xl bg-blue-50 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <span className="text-2xl">📄</span>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-800">Chưa có file mẫu?</p>
+                    <p className="text-xs text-gray-500">Tải về file Excel mẫu để điền thông tin</p>
+                  </div>
+                </div>
+                <button className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-blue-600">
+                  Tải file mẫu
+                </button>
+              </div>
+            </div>
+
+            {/* Instructions */}
+            <div className="mt-6">
+              <h4 className="mb-3 text-sm font-bold text-gray-700">📋 Hướng dẫn:</h4>
+              <ul className="space-y-2 text-sm text-gray-600">
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500">•</span>
+                  <span>File Excel cần có các cột: Họ tên, Tuổi, Lớp, MSSV, Giới tính, Địa chỉ, Họ tên bố mẹ, SĐT bố mẹ, Nghề nghiệp, Địa chỉ công tác</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500">•</span>
+                  <span>Dòng đầu tiên phải là tiêu đề các cột</span>
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-blue-500">•</span>
+                  <span>Tối đa 100 học sinh mỗi lần tải lên</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Mode: Manual Input
+    if (addStudentMode === 'manual') {
+      return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+          <div className="relative max-h-[90vh] w-[800px] overflow-auto rounded-3xl bg-white p-8 shadow-2xl">
+            {/* Header */}
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setAddStudentMode('')}
+                  className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200"
+                >
+                  ←
+                </button>
+                <div>
+                  <h2 className="text-2xl font-bold text-gray-800">Thêm học sinh mới</h2>
+                  <p className="text-sm text-gray-500">Nhập đầy đủ thông tin học sinh</p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAddStudentModal(false);
+                  setAddStudentMode('');
+                }}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-100 text-gray-600 transition-all hover:bg-gray-200"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Form */}
+            <form className="space-y-6">
+              {/* Thông tin cá nhân */}
+              <div>
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-800">
+                  <span>👤</span> Thông tin cá nhân
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Họ và tên *</label>
+                    <input
+                      type="text"
+                      placeholder="Nguyễn Văn A"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Tuổi *</label>
+                    <input
+                      type="number"
+                      placeholder="20"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Lớp *</label>
+                    <input
+                      type="text"
+                      placeholder="10A1"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Mã học sinh *</label>
+                    <input
+                      type="text"
+                      placeholder="22080XXX"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Giới tính *</label>
+                    <select className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100">
+                      <option value="">Chọn giới tính</option>
+                      <option value="Nam">Nam</option>
+                      <option value="Nữ">Nữ</option>
+                      <option value="Khác">Khác</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Địa chỉ</label>
+                    <input
+                      type="text"
+                      placeholder="123 Đường ABC, Quận XYZ"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Thông tin phụ huynh */}
+              <div>
+                <h3 className="mb-4 flex items-center gap-2 text-lg font-bold text-gray-800">
+                  <span>👨‍👩‍👧</span> Thông tin phụ huynh
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Họ tên bố/mẹ</label>
+                    <input
+                      type="text"
+                      placeholder="Nguyễn Văn B"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Số điện thoại</label>
+                    <input
+                      type="tel"
+                      placeholder="0912345678"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Nghề nghiệp</label>
+                    <input
+                      type="text"
+                      placeholder="Kỹ sư"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-gray-700">Địa chỉ công tác</label>
+                    <input
+                      type="text"
+                      placeholder="Công ty ABC, Quận XYZ"
+                      className="w-full rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 border-t pt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowAddStudentModal(false);
+                    setAddStudentMode('');
+                  }}
+                  className="flex-1 rounded-xl bg-gray-100 py-3 font-medium text-gray-700 transition-all hover:bg-gray-200"
+                >
+                  Hủy
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 rounded-xl bg-blue-500 py-3 font-medium text-white transition-all hover:bg-blue-600 hover:shadow-lg"
+                >
+                  Thêm học sinh
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      );
+    }
+  };
 
   // Component: Modal Template
   const renderTemplateModal = () => {
@@ -524,11 +843,11 @@ const ClappyApp = () => {
       {/* Header thống kê */}
       <div className="grid grid-cols-4 gap-4">
         <div className="rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 p-6 text-white shadow-lg">
-          <div className="text-3xl font-bold">156</div>
+          <div className="text-3xl font-bold">9</div>
           <div className="text-sm text-blue-100">Tổng học sinh</div>
         </div>
         <div className="rounded-2xl bg-gradient-to-br from-green-500 to-green-600 p-6 text-white shadow-lg">
-          <div className="text-3xl font-bold">42</div>
+          <div className="text-3xl font-bold">9</div>
           <div className="text-sm text-green-100">Đang online</div>
         </div>
         <div className="rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 p-6 text-white shadow-lg">
@@ -536,7 +855,7 @@ const ClappyApp = () => {
           <div className="text-sm text-purple-100">Điểm trung bình</div>
         </div>
         <div className="rounded-2xl bg-gradient-to-br from-orange-500 to-orange-600 p-6 text-white shadow-lg">
-          <div className="text-3xl font-bold">12</div>
+          <div className="text-3xl font-bold">1</div>
           <div className="text-sm text-orange-100">Lớp học</div>
         </div>
       </div>
@@ -551,7 +870,10 @@ const ClappyApp = () => {
               placeholder="Tìm kiếm học sinh..."
               className="rounded-lg border border-gray-200 px-4 py-2 text-sm focus:border-blue-400 focus:outline-none"
             />
-            <button className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600">
+            <button
+              onClick={() => setShowAddStudentModal(true)}
+              className="rounded-lg bg-blue-500 px-4 py-2 text-sm font-medium text-white hover:bg-blue-600"
+            >
               ➕ Thêm học sinh
             </button>
           </div>
@@ -568,7 +890,7 @@ const ClappyApp = () => {
               </div>
               <div className="flex-1">
                 <div className="font-semibold text-gray-800">{student.name}</div>
-                <div className="text-sm text-gray-500">Lớp 10A{idx + 1}</div>
+                <div className="text-sm text-gray-500">MSSV: {student.studentId}</div>
               </div>
               <div className="text-right">
                 <div className="font-bold text-gray-800">{student.score} điểm</div>
@@ -825,8 +1147,8 @@ const ClappyApp = () => {
             👩‍🏫
           </div>
           <div>
-            <p className="font-bold text-gray-800">Nguyễn Thị Lan</p>
-            <p className="text-sm text-gray-500">lan.nguyen@school.edu.vn</p>
+            <p className="font-bold text-gray-800">Trần Trúc Mai</p>
+            <p className="text-sm text-gray-500">mai.tran@school.edu.vn</p>
             <p className="text-xs text-blue-600">Giáo viên - Gói Premium</p>
           </div>
         </div>
@@ -1152,7 +1474,7 @@ const ClappyApp = () => {
                 👩‍🏫
               </div>
               <div className="text-left">
-                <p className="text-sm font-bold text-gray-800">Cô Lan</p>
+                <p className="text-sm font-bold text-gray-800">Cô Mai</p>
                 <p className="text-xs text-gray-500">Giáo viên</p>
               </div>
               <span className="ml-2 text-gray-400">▼</span>
@@ -1195,6 +1517,9 @@ const ClappyApp = () => {
 
       {/* Template Modal */}
       {renderTemplateModal()}
+
+      {/* Add Student Modal */}
+      {renderAddStudentModal()}
     </div>
   );
 };
